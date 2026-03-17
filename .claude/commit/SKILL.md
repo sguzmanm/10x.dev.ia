@@ -8,6 +8,10 @@ When generating git commit messages for this repository, you must strictly follo
 - **What:** A brief explanation of the technical changes made.
 - **Why:** The reasoning, context, or business value behind the change.
 
+**Constraints**
+- DO NOT add extra lines to the commit stating the author or any extra info
+- DO NOT include "Made-with: Cursor" or any tool attribution lines
+
 **Example**
 
 ```
