@@ -1,0 +1,14 @@
+{
+  "name": "02-x-clone",
+  "private": true,
+  "workspaces": [
+    "app",
+    "api"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w app",
+    "test": "npm run test -ws",
+    "test:unit": "npm run test:unit -w app",
+    "supabase:gen": "echo \"Pending Supabase type generation setup\""
+  }
+}
