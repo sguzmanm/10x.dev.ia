@@ -1,8 +1,10 @@
+import { BrowserRouter } from "react-router-dom";
+import { AppRoutes } from "./app-routes";
+
 export function App() {
   return (
-    <main>
-      <h1>X Clone</h1>
-      <p>Initial setup ready.</p>
-    </main>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }

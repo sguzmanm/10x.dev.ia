@@ -10,8 +10,12 @@
     "test:unit": "vitest run src/features/**/__tests__/*.unit.test.ts"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@testing-library/user-event": "^14.6.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.13.2",
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
