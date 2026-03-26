@@ -29,3 +29,19 @@ app/src/features/tweet/
 - `npm install`
 - `npm run test`
 - `npm run test:unit`
+
+## Database schema verification
+
+After changing DB migrations or RLS policies:
+
+1. Reset local Supabase DB:
+   - `supabase db reset`
+2. Run SQL verification script:
+   - `docker exec -i supabase_db_02-x-clone psql -v ON_ERROR_STOP=1 -U postgres -d postgres < unit_tests/x_clone_schema_verification.sql`
+
+Expected verification coverage:
+- Publish tweets.
+- Create threaded replies (reply to tweet, reply to reply).
+- Update own profile and block updates to others.
+- Follow and unfollow users.
+- Enforce profile visibility for mutual friends only.
