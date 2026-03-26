@@ -1,8 +1,36 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppRoutes } from "../app-routes";
+
+const { authStateMock, signOutMock } = vi.hoisted(() => ({
+  authStateMock: {
+    isInitializing: false,
+    isAuthenticated: true,
+    user: { id: "user-1", email: "user@example.com" },
+  },
+  signOutMock: vi.fn(),
+}));
+
+vi.mock("../features/auth/auth-context", () => ({
+  useAuth: () => ({ ...authStateMock, signOut: signOutMock }),
+}));
+
+vi.mock("../features/tweet/tweet-repository", () => ({
+  listLatestTweets: vi.fn().mockResolvedValue([]),
+  createTweet: vi.fn(),
+}));
+
+vi.mock("../features/profile/profile-repository", () => ({
+  listVisibleProfiles: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("../features/follow/follow-repository", () => ({
+  listFollowingIds: vi.fn().mockResolvedValue([]),
+  followUser: vi.fn(),
+  unfollowUser: vi.fn(),
+}));
 
 function renderWithRouter(initialEntries: string[]) {
   return render(
@@ -18,11 +46,9 @@ describe("App routing and layout", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Home" })).toBeInTheDocument();
   });
 
-  it("shows Login when path is /login", () => {
+  it("redirects authenticated users from /login to /tweets", async () => {
     renderWithRouter(["/login"]);
-    expect(screen.getByRole("heading", { level: 1, name: "Log in" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(screen.getByLabelText("Password")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Tweets" })).toBeInTheDocument();
   });
 
   it("shows Tweets when path is /tweets", () => {
@@ -38,11 +64,11 @@ describe("App routing and layout", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Home" })).toBeInTheDocument();
   });
 
-  it("navigates to Login when clicking the Login nav link", async () => {
+  it("navigates to tweets when clicking Login while authenticated", async () => {
     const user = userEvent.setup();
     renderWithRouter(["/"]);
     await user.click(screen.getByRole("link", { name: "Login" }));
-    expect(screen.getByRole("heading", { level: 1, name: "Log in" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Tweets" })).toBeInTheDocument();
   });
 
   it("navigates to Tweets when clicking the Tweets nav link", async () => {

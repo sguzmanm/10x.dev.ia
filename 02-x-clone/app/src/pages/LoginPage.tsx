@@ -1,8 +1,37 @@
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../features/auth/auth-context";
+import { getErrorMessage } from "../features/shared/supabase-error";
 
 export function LoginPage() {
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const navigate = useNavigate();
+  const { isAuthenticated, signInWithPassword } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/tweets", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await signInWithPassword({ email, password });
+      navigate("/tweets", { replace: true });
+    } catch (submitError) {
+      setError(getErrorMessage(submitError));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -33,11 +62,17 @@ export function LoginPage() {
             type="password"
           />
         </div>
+        {error ? (
+          <p className="text-sm text-red-400" role="alert">
+            {error}
+          </p>
+        ) : null}
         <button
           className="w-full rounded-full bg-x-accent py-2 font-semibold text-white hover:bg-x-accent/90"
+          disabled={isSubmitting}
           type="submit"
         >
-          Sign in
+          {isSubmitting ? "Signing in..." : "Sign in"}
         </button>
       </form>
     </div>

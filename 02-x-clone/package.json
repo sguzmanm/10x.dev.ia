@@ -10,5 +10,8 @@
     "test": "npm run test -ws",
     "test:unit": "npm run test:unit -w app",
     "supabase:gen": "echo \"Pending Supabase type generation setup\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.0"
   }
 }
