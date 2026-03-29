@@ -1,9 +1,45 @@
+import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { useAuth } from "../features/auth/auth-context";
+import { getProfileByUserId } from "../features/profile/profile-repository";
+import type { Profile } from "../features/shared/models";
 import { getErrorMessage } from "../features/shared/supabase-error";
+import { EditDisplayNameModal } from "./EditDisplayNameModal";
 
 export function AppLayout() {
   const { isAuthenticated, signOut, user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProfile() {
+      if (!isAuthenticated || !user?.id) {
+        if (mounted) {
+          setProfile(null);
+        }
+        return;
+      }
+
+      try {
+        const nextProfile = await getProfileByUserId(user.id);
+        if (mounted) {
+          setProfile(nextProfile);
+        }
+      } catch {
+        if (mounted) {
+          setProfile(null);
+        }
+      }
+    }
+
+    void loadProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated, user?.id]);
 
   async function handleSignOut() {
     try {
@@ -33,7 +69,20 @@ export function AppLayout() {
           <div className="ml-auto flex items-center gap-3 text-sm text-x-muted">
             {isAuthenticated ? (
               <>
-                <span>{user?.email}</span>
+                {profile ? (
+                  <>
+                    <button
+                      className="font-semibold text-x-accent hover:underline"
+                      onClick={() => setIsEditingDisplayName(true)}
+                      type="button"
+                    >
+                      @{profile.username}
+                    </button>
+                    <span>{profile.displayName}</span>
+                  </>
+                ) : (
+                  <span>{user?.email}</span>
+                )}
                 <button className="font-semibold text-x-accent hover:underline" onClick={handleSignOut} type="button">
                   Sign out
                 </button>
@@ -47,6 +96,15 @@ export function AppLayout() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Outlet />
       </main>
+      {profile && user ? (
+        <EditDisplayNameModal
+          currentDisplayName={profile.displayName}
+          isOpen={isEditingDisplayName}
+          onClose={() => setIsEditingDisplayName(false)}
+          onProfileUpdated={setProfile}
+          userId={user.id}
+        />
+      ) : null}
     </div>
   );
 }

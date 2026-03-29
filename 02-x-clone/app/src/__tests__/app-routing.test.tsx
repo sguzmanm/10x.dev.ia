@@ -4,13 +4,15 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { AppRoutes } from "../app-routes";
 
-const { authStateMock, signOutMock } = vi.hoisted(() => ({
+const { authStateMock, signOutMock, getProfileByUserIdMock, updateDisplayNameMock } = vi.hoisted(() => ({
   authStateMock: {
     isInitializing: false,
     isAuthenticated: true,
     user: { id: "user-1", email: "user@example.com" },
   },
   signOutMock: vi.fn(),
+  getProfileByUserIdMock: vi.fn(),
+  updateDisplayNameMock: vi.fn(),
 }));
 
 vi.mock("../features/auth/auth-context", () => ({
@@ -24,6 +26,8 @@ vi.mock("../features/tweet/tweet-repository", () => ({
 
 vi.mock("../features/profile/profile-repository", () => ({
   listVisibleProfiles: vi.fn().mockResolvedValue([]),
+  getProfileByUserId: getProfileByUserIdMock,
+  updateDisplayName: updateDisplayNameMock,
 }));
 
 vi.mock("../features/follow/follow-repository", () => ({
@@ -41,6 +45,23 @@ function renderWithRouter(initialEntries: string[]) {
 }
 
 describe("App routing and layout", () => {
+  beforeEach(() => {
+    getProfileByUserIdMock.mockResolvedValue({
+      userId: "user-1",
+      username: "alice",
+      displayName: "Alice",
+      bio: null,
+      avatarUrl: null,
+    });
+    updateDisplayNameMock.mockResolvedValue({
+      userId: "user-1",
+      username: "alice",
+      displayName: "Alice Updated",
+      bio: null,
+      avatarUrl: null,
+    });
+  });
+
   it("shows Home when path is /", () => {
     renderWithRouter(["/"]);
     expect(screen.getByRole("heading", { level: 1, name: "Home" })).toBeInTheDocument();
@@ -76,5 +97,21 @@ describe("App routing and layout", () => {
     renderWithRouter(["/"]);
     await user.click(screen.getByRole("link", { name: "Tweets" }));
     expect(screen.getByRole("heading", { level: 1, name: "Tweets" })).toBeInTheDocument();
+  });
+
+  it("opens display name modal from header username and saves", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(["/"]);
+
+    const usernameButton = await screen.findByRole("button", { name: "@alice" });
+    await user.click(usernameButton);
+
+    const input = screen.getByLabelText("Display name");
+    await user.clear(input);
+    await user.type(input, "Alice Updated");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(updateDisplayNameMock).toHaveBeenCalledWith("user-1", "Alice Updated");
+    expect(await screen.findByText("Alice Updated")).toBeInTheDocument();
   });
 });

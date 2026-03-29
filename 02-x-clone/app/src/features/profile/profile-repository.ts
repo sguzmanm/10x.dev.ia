@@ -44,3 +44,39 @@ export async function getProfileByUserId(
 
   return data ? mapProfile(data as ProfileRow) : null;
 }
+
+export async function getProfileByUsername(
+  username: string,
+  client: SupabaseClient<Database> = supabaseClient,
+): Promise<Profile | null> {
+  const { data, error } = await client
+    .from("profiles")
+    .select("user_id, username, display_name, bio, avatar_url")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? mapProfile(data as ProfileRow) : null;
+}
+
+export async function updateDisplayName(
+  userId: string,
+  displayName: string,
+  client: SupabaseClient<Database> = supabaseClient,
+): Promise<Profile> {
+  const { data, error } = await client
+    .from("profiles")
+    .update({ display_name: displayName })
+    .eq("user_id", userId)
+    .select("user_id, username, display_name, bio, avatar_url")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return mapProfile(data as ProfileRow);
+}

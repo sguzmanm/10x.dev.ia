@@ -199,7 +199,13 @@ export function TweetsPage() {
               key={tweet.id}
             >
               <p className="text-sm text-x-muted">
-                @{tweet.authorUsername} · {tweet.authorDisplayName}
+                <Link className="hover:underline" to={`/profile/${tweet.authorUsername}`}>
+                  @{tweet.authorUsername}
+                </Link>{" "}
+                ·{" "}
+                <Link className="hover:underline" to={`/profile/${tweet.authorUsername}`}>
+                  {tweet.authorDisplayName}
+                </Link>
               </p>
               <p className="mt-1 whitespace-pre-wrap">{tweet.body}</p>
             </li>
@@ -227,8 +233,16 @@ export function TweetsPage() {
                 key={profile.userId}
               >
                 <div>
-                  <p className="font-medium">{profile.displayName}</p>
-                  <p className="text-sm text-x-muted">@{profile.username}</p>
+                  <p className="font-medium">
+                    <Link className="hover:underline" to={`/profile/${profile.username}`}>
+                      {profile.displayName}
+                    </Link>
+                  </p>
+                  <p className="text-sm text-x-muted">
+                    <Link className="hover:underline" to={`/profile/${profile.username}`}>
+                      @{profile.username}
+                    </Link>
+                  </p>
                   {profile.bio ? <p className="mt-1 text-sm text-x-muted">{profile.bio}</p> : null}
                 </div>
                 <button

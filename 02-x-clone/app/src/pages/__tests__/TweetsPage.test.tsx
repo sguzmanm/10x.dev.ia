@@ -134,4 +134,14 @@ describe("TweetsPage compose validation", () => {
     expect(followUserMock).toHaveBeenCalledWith("user-1", "user-2");
     expect(await screen.findByRole("button", { name: "Unfollow" })).toBeInTheDocument();
   });
+
+  it("links authors to their public profile pages", async () => {
+    renderTweets();
+
+    const tweetAuthorLinks = await screen.findAllByRole("link", { name: /@bob/i });
+    expect(tweetAuthorLinks[0]).toHaveAttribute("href", "/profile/bob");
+
+    const peopleAuthorLinks = screen.getAllByRole("link", { name: "Bob" });
+    expect(peopleAuthorLinks[0]).toHaveAttribute("href", "/profile/bob");
+  });
 });
