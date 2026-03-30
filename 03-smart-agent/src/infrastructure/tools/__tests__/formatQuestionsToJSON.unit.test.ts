@@ -70,9 +70,21 @@ describe('formatQuestionsToJSON', () => {
     expect(() => formatQuestionsToJSON(invalid)).toThrow('Question text must not be empty');
   });
 
+  it('should throw when a question has only one option', () => {
+    const invalid: RawQuestion[] = [
+      { question: 'Is this valid?', options: ['Yes'], reasoning: 'test' },
+    ];
+
+    expect(() => formatQuestionsToJSON(invalid)).toThrow(
+      'Question must have at least two options',
+    );
+  });
+
   it('should throw when a question has no options', () => {
     const invalid: RawQuestion[] = [{ question: 'Is this valid?', options: [], reasoning: 'test' }];
 
-    expect(() => formatQuestionsToJSON(invalid)).toThrow('Question must have at least one option');
+    expect(() => formatQuestionsToJSON(invalid)).toThrow(
+      'Question must have at least two options',
+    );
   });
 });

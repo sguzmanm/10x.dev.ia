@@ -21,8 +21,8 @@ export function formatQuestionsToJSON(questions: RawQuestion[]): string {
     if (!raw.question.trim()) {
       throw new Error('Question text must not be empty');
     }
-    if (raw.options.length === 0) {
-      throw new Error('Question must have at least one option');
+    if (raw.options.length < 2) {
+      throw new Error('Question must have at least two options');
     }
 
     return {
